@@ -1,6 +1,6 @@
 from botocore.exceptions import ClientError
 import boto3
-from . import get_logger
+from .logger import get_logger
 
 logger = get_logger(__name__)
 
@@ -23,29 +23,27 @@ class BaseDynamoDBService:
         try:
             response = self.table.get_item(Key=key)
             item = response.get("Item")
-            logger.info(f"fetching item: {item} with key {key}")
+            logger.info(f"Fetching item: {item} with key {key}")
             return {"success": True, "item": item}
         except ClientError as e:
-            logger.error(f"fetching item failed: {str(e)}")
+            logger.error(f"Fetching item failed: {str(e)}")
             return {"success": False, "error": str(e)}
 
     def update(self, key, updates):
-        """Update a record."""
-        table = self.get_table()
         update_expr = "SET " + ", ".join([f"{k}=:{k}" for k in updates])
         expr_vals = {f":{k}": v for k, v in updates.items()}
         try:
-            table.update_item(
+            self.table.update_item(
                 Key=key,
                 UpdateExpression=update_expr,
                 ExpressionAttributeValues=expr_vals,
             )
             logger.info(f"Updated key: {key} with updates {updates}")
-            return {"success": True, "item": updates}
+            return {"success": True, "updated_fields": updates}
         except Exception as e:
             logger.error(f"Update failed: {key}: {str(e)}")
             return {"success": False, "error": str(e)}
-        
+
     def delete(self, key):
         try:
             self.table.delete_item(Key=key)
