@@ -13,20 +13,22 @@ class BaseDynamoDBService:
     def create(self, item):
         try:
             self.table.put_item(Item=item)
-            logger.info(f"Created item: {item}")
-            return {"success": True, "item": item}
+            self.logger.info(f"Created item: {item}")
+            return {"success": True, "message": "Item created successfully", "item": item}
         except ClientError as e:
-            logger.error(f"Create failed: {str(e)}")
+            self.logger.error(f"Create failed: {str(e)}")
             return {"success": False, "error": str(e)}
 
     def read(self, key):
         try:
             response = self.table.get_item(Key=key)
             item = response.get("Item")
-            logger.info(f"Fetching item: {item} with key {key}")
+            if not item:
+                return {"success": False, "error": "Item not found"}
+            self.logger.info(f"📄 Read item: {item}")
             return {"success": True, "item": item}
         except ClientError as e:
-            logger.error(f"Fetching item failed: {str(e)}")
+            self.logger.error(f"❌ Read failed: {str(e)}")
             return {"success": False, "error": str(e)}
 
     def update(self, key, updates):
@@ -38,17 +40,28 @@ class BaseDynamoDBService:
                 UpdateExpression=update_expr,
                 ExpressionAttributeValues=expr_vals,
             )
-            logger.info(f"Updated key: {key} with updates {updates}")
-            return {"success": True, "updated_fields": updates}
+            self.logger.info(f"Updated key: {key} with updates {updates}")
+            return {"success": True, "message": "Item updated successfully", "updated_fields": updates}
         except Exception as e:
-            logger.error(f"Update failed: {key}: {str(e)}")
+            self.logger.error(f"Update failed: {key}: {str(e)}")
             return {"success": False, "error": str(e)}
 
     def delete(self, key):
         try:
             self.table.delete_item(Key=key)
-            logger.info(f"Deleted item with key {key}")
-            return {"success": True}
+            self.logger.info(f"Deleted item with key {key}")
+            return {"success": True, "message": "Item deleted successfully"}
         except ClientError as e:
-            logger.error(f"Delete failed: {str(e)}")
+            self.logger.error(f"Delete failed: {str(e)}")
+            return {"success": False, "error": str(e)}
+        
+    def find_all(self):
+        """Return all items from the table."""
+        try:
+            response = self.table.scan()
+            items = response.get("Items", [])
+            self.logger.info(f"📦 Retrieved {len(items)} items")
+            return {"success": True, "items": items}
+        except ClientError as e:
+            self.logger.error(f"❌ Scan failed: {str(e)}")
             return {"success": False, "error": str(e)}
