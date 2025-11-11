@@ -32,19 +32,35 @@ class BaseDynamoDBService:
             return {"success": False, "error": str(e)}
 
     def update(self, key, updates):
-        update_expr = "SET " + ", ".join([f"{k}=:{k}" for k in updates])
-        expr_vals = {f":{k}": v for k, v in updates.items()}
+        # Handle reserved keywords safely
+        expression_attribute_names = {}
+        update_parts = []
+        expression_attribute_values = {}
+
+        for attr, value in updates.items():
+            placeholder_name = f"#{attr}"
+            placeholder_value = f":{attr}"
+
+            expression_attribute_names[placeholder_name] = attr
+            expression_attribute_values[placeholder_value] = value
+
+            update_parts.append(f"{placeholder_name} = {placeholder_value}")
+
+        update_expression = "SET " + ", ".join(update_parts)
+
         try:
             self.table.update_item(
                 Key=key,
-                UpdateExpression=update_expr,
-                ExpressionAttributeValues=expr_vals,
+                UpdateExpression=update_expression,
+                ExpressionAttributeNames=expression_attribute_names,
+                ExpressionAttributeValues=expression_attribute_values,
             )
             self.logger.info(f"Updated key: {key} with updates {updates}")
             return {"success": True, "message": "Item updated successfully", "updated_fields": updates}
         except Exception as e:
             self.logger.error(f"Update failed: {key}: {str(e)}")
             return {"success": False, "error": str(e)}
+
 
     def delete(self, key):
         try:
