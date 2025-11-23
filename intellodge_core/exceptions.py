@@ -1,7 +1,5 @@
-"""
-Custom exceptions for the IntelRev application.
-These standardize error handling across modules.
-"""
+# Custom exceptions for the IntelRev application. These standardize error handling across modules.
+
 
 class IntelRevError(Exception):
     """Base class for all IntelRev-specific exceptions."""

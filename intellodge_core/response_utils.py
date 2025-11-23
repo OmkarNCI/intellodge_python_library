@@ -1,7 +1,4 @@
-"""
-Standard response helpers for views, services, and APIs.
-Ensures consistent structure across modules.
-"""
+# Standard response helpers for views, services, and APIs, ensures consistent structure across modules.
 
 def success_response(data=None, message="Success"):
     return {

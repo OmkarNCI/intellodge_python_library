@@ -1,7 +1,5 @@
-"""
-Validation utilities for checking input fields and data structures.
-Used across all service and form layers.
-"""
+# Validation utilities for checking input fields and data structures.
+
 
 def require_fields(data, required_fields):
     """Ensure required fields exist and are not empty."""

@@ -11,6 +11,7 @@ class BaseDynamoDBService:
         self.logger = get_logger(f"intellodge.{table_name}")
 
     def create(self, item):
+        # it creates the items in any tables
         try:
             self.table.put_item(Item=item)
             self.logger.info(f"Created item: {item}")
@@ -20,19 +21,20 @@ class BaseDynamoDBService:
             return {"success": False, "error": str(e)}
 
     def read(self, key):
+        # it gets the items from any tables
         try:
             response = self.table.get_item(Key=key)
             item = response.get("Item")
             if not item:
                 return {"success": False, "error": "Item not found"}
-            self.logger.info(f"📄 Read item: {item}")
+            self.logger.info(f"Read item: {item}")
             return {"success": True, "item": item}
         except ClientError as e:
-            self.logger.error(f"❌ Read failed: {str(e)}")
+            self.logger.error(f"Read failed: {str(e)}")
             return {"success": False, "error": str(e)}
 
     def update(self, key, updates):
-        # Handle reserved keywords safely
+        # Handle update items for any tables
         expression_attribute_names = {}
         update_parts = []
         expression_attribute_values = {}
@@ -63,6 +65,7 @@ class BaseDynamoDBService:
 
 
     def delete(self, key):
+        # Delete the items from any table
         try:
             self.table.delete_item(Key=key)
             self.logger.info(f"Deleted item with key {key}")
@@ -72,12 +75,12 @@ class BaseDynamoDBService:
             return {"success": False, "error": str(e)}
         
     def find_all(self):
-        """Return all items from the table."""
+        # Return all items from the table.
         try:
             response = self.table.scan()
             items = response.get("Items", [])
-            self.logger.info(f"📦 Retrieved {len(items)} items")
+            self.logger.info(f"Retrieved {len(items)} items")
             return {"success": True, "items": items}
         except ClientError as e:
-            self.logger.error(f"❌ Scan failed: {str(e)}")
+            self.logger.error(f"Scan failed: {str(e)}")
             return {"success": False, "error": str(e)}

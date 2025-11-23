@@ -1,12 +1,10 @@
-"""
-Centralized logger for all application modules.
-Ensures consistent format and avoids duplicate handlers.
-"""
+# Centralized logger for all application modules.
+
 
 import logging
 
 def get_logger(name="intellodge"):
-    """Return a logger with unified formatting."""
+    # Return a logger with unified formatting.
     logger = logging.getLogger(name)
     if not logger.handlers:
         handler = logging.StreamHandler()

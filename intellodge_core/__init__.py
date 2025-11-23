@@ -13,7 +13,7 @@ Includes:
 - Datetime helpers
 """
 
-__version__ = "1.0.3"
+__version__ = "1.0.4"
 __author__ = "IntellLodge Omi"
 __all__ = [
     "base_service",
